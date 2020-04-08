@@ -5,10 +5,12 @@ import todo from '../../services/todo';
 import createService from '../../createService';
 
 const service = createService(todo);
+service.bindModel(store.getModelDispatchers('todos'));
 
 const Guide = () => {
   const { request, data, loading } = service.useRequest('getAll');
   const [ state ] = store.useModel('todos');
+  service.useInit();
 
   React.useEffect(() => {
     // request();

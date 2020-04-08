@@ -1,8 +1,9 @@
+import React from 'react';
 import { request as iceRequest, useRequest as useIceRequest } from 'ice';
 import * as merge from 'lodash.merge';
 
 export default function(configs) {
-  const { config, requests } = configs;
+  const { config, requests, dataHandler } = configs;
 
   const results = {};
   Object.keys(requests).forEach((name) => {
@@ -80,14 +81,64 @@ export default function(configs) {
     return Object.assign({}, results[name]);
   }
 
-  function useBindModel(model) {
-    const [, ] = model;
+  function getInitRequests() {
+    const initRequests: any = {};
+    Object.keys(requests).forEach((name) => {
+      const { isInit } = requests[name];
+      if (isInit) {
+        initRequests[name] = getRequest(name);
+      }
+    });
+    return initRequests;
+  }
+
+  async function requestInitData() {
+    const initRequests = getInitRequests();
+    const dataMap = {};
+    let error;
+    await Promise.all(Object.keys(initRequests).map(async (name) => {
+      const initRequest = initRequests[name];
+      try {
+        dataMap[name] = await initRequest();
+      } catch (e) {
+        error = e;
+      }
+    }));
+    return {
+      dataMap,
+      error,
+    };
+  }
+
+  let modelDispatchers;
+  function bindModel(value) {
+    modelDispatchers = value;
+  }
+
+  async function reload() {
+    const result = await requestInitData();
+    let nextState = result.dataMap;
+    if (dataHandler) {
+      nextState = dataHandler(result);
+    }
+
+    modelDispatchers.setState(nextState);
+  }
+
+  function useInit() {
+    React.useEffect(() => {
+      reload();
+    }, []);
   }
 
   return {
     useRequest,
     getRequest,
     getResult,
-    useBindModel,
+
+    // 互转完备性
+    useInit,
+    bindModel,
+    reload,
   };
 }
