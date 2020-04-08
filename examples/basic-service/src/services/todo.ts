@@ -1,12 +1,10 @@
 import PropTypes from 'prop-types';
 
 const config = {
-  type: 'fetch',
-  host: 'https://mocks.alibaba-inc.com',
-  baseUrl: '/mock/D8iUX7zB',
-  method: 'get',
-  timeout: '3000',
-  header: {
+  options: {
+    baseURL: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB',
+    method: 'get',
+    timeout: 3000,
   },
   response: {
     success: PropTypes.bool.isRequired,
@@ -14,13 +12,16 @@ const config = {
     errorCode: PropTypes.string,
     errorMsg: PropTypes.string,
   },
-  dataHandler(response, error) {
+  dataHandler(response) {
     return response.data;
   },
 };
 
 const getAll = {
-  url: '/service_todos',
+  isInit: true, // 互转字段：初始化数据
+  options: {
+    url: '/getAll',
+  },
   response: {
     data: PropTypes.arrayOf(
       PropTypes.shape({
@@ -33,8 +34,14 @@ const getAll = {
 };
 
 const addTodo = {
-  uri: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB/addTodo',
-  method: 'post',
+  options: {
+    url: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB/addTodo', // 直接设置 url
+    method: 'post',
+    timeout: 5000,
+    headers: {
+
+    },
+  },
   params: {
     title: PropTypes.string.isRequired,
     done: PropTypes.bool
@@ -53,5 +60,10 @@ export default {
   requests: {
     getAll,
     addTodo,
-  }
+  },
+
+  // 互转字段，用户处理初始化请求的数据
+  dataHandler(dataMap, error) {
+    return dataMap;
+  },
 };
