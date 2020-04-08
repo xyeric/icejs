@@ -1,3 +1,5 @@
 export default {
-  state: [],
+  state: {
+    dataSources: []
+  },
 };

@@ -110,24 +110,24 @@ export default function(configs) {
     };
   }
 
-  let modelDispatchers;
-  function bindModel(value) {
-    modelDispatchers = value;
+  let dispatchers;
+  function bindModel([, value]) {
+    dispatchers = value;
   }
 
-  async function reload() {
-    const result = await requestInitData();
-    let nextState = result.dataMap;
+  async function reloadInit() {
+    const { dataMap, error } = await requestInitData();
+    let nextState = dataMap;
     if (dataHandler) {
-      nextState = dataHandler(result);
+      nextState = dataHandler(dataMap, error);
     }
 
-    modelDispatchers.setState(nextState);
+    dispatchers.setState(nextState);
   }
 
   function useInit() {
     React.useEffect(() => {
-      reload();
+      reloadInit();
     }, []);
   }
 
@@ -137,8 +137,8 @@ export default function(configs) {
     getResult,
 
     // 互转完备性
-    useInit,
     bindModel,
-    reload,
+    useInit,
+    reloadInit,
   };
 }
