@@ -1447,9 +1447,9 @@
     url-parse "^1.1.9"
 
 "@ice/store@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.npm.taobao.org/@ice/store/download/@ice/store-1.3.1.tgz?cache=0&sync_timestamp=1585911451404&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40ice%2Fstore%2Fdownload%2F%40ice%2Fstore-1.3.1.tgz#988a90d9b4803f5a8a796e4e2410444dc15d7db6"
-  integrity sha1-mIqQ2bSAP1qKeW5OJBBETcFdfbY=
+  version "1.3.3"
+  resolved "https://registry.npmjs.org/@ice/store/-/store-1.3.3.tgz#8823a79470df3a6747a8a2c6297658596fd9d7e1"
+  integrity sha512-w13gnAo2eW09dM0wLQRSIIv6G2UrWBWD2190ou6lNeF1rXiu98ta8bEEbjRP3PPI0cYTuORTAF2HIpJvqK6osQ==
   dependencies:
     immer "^6.0.2"
     lodash.isfunction "^3.0.9"
