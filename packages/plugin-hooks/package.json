@@ -1,0 +1,32 @@
+{
+  "name": "build-plugin-ice-hooks",
+  "version": "1.1.5",
+  "description": "built-in react-use in icejs",
+  "author": "ice-admin@alibaba-inc.com",
+  "homepage": "https://github.com/ice-lab/icejs#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "registry": "http://registry.npmjs.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ice-lab/icejs.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/ice-lab/icejs/issues"
+  },
+  "dependencies": {
+    "react-use": "^14.1.0"
+  }
+}
