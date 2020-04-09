@@ -1,10 +1,10 @@
 /* eslint @typescript-eslint/explicit-member-accessibility:0 */
 import * as React from 'react';
-import ErrorBoundaryFallbackComponent from './ErrorBoundaryFallbackComponent';
+import ErrorBoundaryFallback from './ErrorBoundaryFallback';
 
 interface IProps {
-  children?: any;
-  FallbackComponent: React.ComponentType<any>;
+  children?: React.ReactNode;
+  Fallback: React.ComponentType<any>;
   onError?: Function;
 };
 
@@ -19,37 +19,38 @@ interface IState {
 
 class ErrorBoundary extends React.Component<IProps, IState> {
   static defaultProps = {
-    FallbackComponent: ErrorBoundaryFallbackComponent,
+    Fallback: ErrorBoundaryFallback,
   };
 
   state = {
     error: null,
-    info: null,
+    info: null
   };
 
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: IErrorInfo): void {
     const { onError } = this.props;
 
     if (typeof onError === 'function') {
       try {
-        /* istanbul ignore next: Ignoring ternary; can’t reproduce missing info in test environment. */
+        // istanbul ignore next: Ignoring ternary; can’t reproduce missing info in test environment.
         onError.call(this, error, info ? info.componentStack : '');
       } catch (ignoredError) {
         // ignored error
       }
     }
 
-    this.setState({error, info});
+    // Update state so the next render will show the fallback UI.
+    this.setState({ error, info });
   }
 
   render() {
-    const { children, FallbackComponent } = this.props;
+    const { children, Fallback } = this.props;
     const { error, info } = this.state;
 
     // render fallback UI if there is error
     if (error !== null) {
       return (
-        <FallbackComponent
+        <Fallback
           componentStack={
             // istanbul ignore next: Ignoring ternary; can’t reproduce missing info in test environment.
             info ? info.componentStack : ''
@@ -63,13 +64,17 @@ class ErrorBoundary extends React.Component<IProps, IState> {
   }
 }
 
-export const withErrorBoundary = (
-  Component: React.ComponentType<any>,
-  FallbackComponent: React.ComponentType<any>,
-  onError: Function,
-): Function => {
+export const withErrorBoundary = ({
+  Component,
+  Fallback,
+  onError
+}: {
+  Component: React.ComponentType<any>;
+  Fallback?: React.ComponentType<any>;
+  onError?: Function;
+}): Function => {
   const Wrapped = props => (
-    <ErrorBoundary FallbackComponent={FallbackComponent} onError={onError}>
+    <ErrorBoundary Fallback={Fallback || ErrorBoundaryFallback} onError={onError}>
       <Component {...props} />
     </ErrorBoundary>
   );
