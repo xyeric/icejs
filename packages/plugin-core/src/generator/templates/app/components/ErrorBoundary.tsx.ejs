@@ -46,6 +46,7 @@ class ErrorBoundary extends React.Component<IProps, IState> {
     const { children, FallbackComponent } = this.props;
     const { error, info } = this.state;
 
+    // render fallback UI if there is error
     if (error !== null) {
       return (
         <FallbackComponent
