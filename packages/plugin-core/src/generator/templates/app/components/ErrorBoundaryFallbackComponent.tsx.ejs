@@ -1,0 +1,15 @@
+import * as React from 'react';
+
+const toTitle = (error: Error, componentStack: string): string => {
+  return `${error.toString()}\n\nThis is located at:${componentStack}`;
+};
+
+const ErrorBoundaryFallbackComponent = ({componentStack, error}) => {
+  return (
+    <div title={toTitle(error, componentStack)}>
+      渲染错误
+    </div>
+  );
+};
+
+export default ErrorBoundaryFallbackComponent;

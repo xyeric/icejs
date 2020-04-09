@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom';
 import * as ReactDOMServer from 'react-dom/server';
 import { createBrowserHistory, createHashHistory, createMemoryHistory, History } from '$ice/history';
 import deepmerge from 'deepmerge';
+import ErrorBoundary from './components/ErrorBoundary';
 import RuntimeModule from './runtimeModule';
 import { setAppConfig } from './appConfig';
 import { IAppConfig } from './types';
@@ -96,10 +97,13 @@ function renderApp(config: IAppConfig, context: IContext) {
   const AppRouter = runtime.getAppRouter();
 
   function App() {
-    const appContent = (
-      <AppRouter />
-    );
-    return AppProvider ? <AppProvider>{appContent}</AppProvider> : appContent;
+    const appRouter = <AppRouter />;
+    const rootApp = AppProvider ? <AppProvider>{appRouter}</AppProvider> : appRouter;
+    return (
+      <ErrorBoundary>
+        {rootApp}
+      </ErrorBoundary>
+    )
   }
 
   if (process.env.__IS_SERVER__) {

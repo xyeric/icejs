@@ -1,0 +1,87 @@
+/* eslint @typescript-eslint/explicit-member-accessibility:0 */
+import * as React from 'react';
+import ErrorBoundaryFallbackComponent from './ErrorBoundaryFallbackComponent';
+
+interface IProps {
+  children?: any;
+  FallbackComponent: React.ComponentType<any>;
+  onError?: Function;
+};
+
+interface IErrorInfo {
+  componentStack: string;
+};
+
+interface IState {
+  error?: Error;
+  info?: IErrorInfo;
+};
+
+class ErrorBoundary extends React.Component<IProps, IState> {
+  static defaultProps = {
+    FallbackComponent: ErrorBoundaryFallbackComponent,
+  };
+
+  state = {
+    error: null,
+    info: null,
+  };
+
+  componentDidCatch(error, info) {
+    const { onError } = this.props;
+
+    if (typeof onError === 'function') {
+      try {
+        /* istanbul ignore next: Ignoring ternary; can’t reproduce missing info in test environment. */
+        onError.call(this, error, info ? info.componentStack : '');
+      } catch (ignoredError) {
+        // ignored error
+      }
+    }
+
+    this.setState({error, info});
+  }
+
+  render() {
+    const { children, FallbackComponent } = this.props;
+    const { error, info } = this.state;
+
+    if (error !== null) {
+      return (
+        <FallbackComponent
+          componentStack={
+            // istanbul ignore next: Ignoring ternary; can’t reproduce missing info in test environment.
+            info ? info.componentStack : ''
+          }
+          error={error}
+        />
+      );
+    }
+
+    return children || null;
+  }
+}
+
+export const withErrorBoundary = (
+  Component: React.ComponentType<any>,
+  FallbackComponent: React.ComponentType<any>,
+  onError: Function,
+): Function => {
+  const Wrapped = props => (
+    <ErrorBoundary FallbackComponent={FallbackComponent} onError={onError}>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+
+  // Format for display in DevTools
+  const name = Component.displayName || Component.name;
+  Wrapped.displayName = name
+    ? `WithErrorBoundary(${name})`
+    : 'WithErrorBoundary';
+
+  return Wrapped;
+};
+
+export default ErrorBoundary;
+
+
