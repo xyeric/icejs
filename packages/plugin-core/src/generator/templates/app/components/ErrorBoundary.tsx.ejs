@@ -64,15 +64,11 @@ class ErrorBoundary extends React.Component<IProps, IState> {
   }
 }
 
-export const withErrorBoundary = ({
-  Component,
-  Fallback,
-  onError
-}: {
-  Component: React.ComponentType<any>;
-  Fallback?: React.ComponentType<any>;
-  onError?: Function;
-}): Function => {
+export const withErrorBoundary = (
+  Component: React.ComponentType<any>,
+  Fallback?: React.ComponentType<any>,
+  onError?: Function
+): Function => {
   const Wrapped = props => (
     <ErrorBoundary Fallback={Fallback || ErrorBoundaryFallback} onError={onError}>
       <Component {...props} />
