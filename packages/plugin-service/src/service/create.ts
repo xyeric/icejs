@@ -1,12 +1,55 @@
-import React from 'react';
-import { request as iceRequest, useRequest as useIceRequest } from 'ice';
+import * as React from 'react';
+import * as PropTypes from 'prop-types';
+import iceRequest from '@ice/request';
+import useIceRequest from '@ice/useRequest';
 import * as merge from 'lodash.merge';
 
-export default function(configs) {
+type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
+
+type DataHandler = <T = any>(response: T) => T;
+
+interface BaseConfing {
+  type?: string;
+  options: any;
+  params?: any;
+  response?: any;
+  dataHandler?: DataHandler;
+}
+
+interface Config extends BaseConfing{
+  dataHandler?: DataHandler;
+}
+
+interface RequestConfig extends BaseConfing {
+  isInit?: boolean;
+}
+
+interface Configs {
+  config: Config;
+  requests: {
+    [name: string]: RequestConfig;
+  };
+  dataHandler?(dataMap, error): any;
+}
+
+type InferProps<Value, Key extends keyof Value> = PropTypes.InferProps<PropType<Value, Key>>;
+
+export default function<C extends Configs>(configs: C) {
+  type IRequestsConfig = PropType<C, 'requests'>;
+  type IConfig = PropType<C, 'config'>;
+  type IRequestsConfigKey = keyof IRequestsConfig;
+  type IRequestsConfigKeys = IRequestsConfigKey[];
+  type Results<R> = {
+    [K in keyof R]: {
+      status: string;
+      data: any;
+      error: Error | null;
+    }
+  }
   const { config, requests, dataHandler } = configs;
 
-  const results = {};
-  Object.keys(requests).forEach((name) => {
+  const results: Results<IRequestsConfig> = {} as any;
+  (Object.keys(requests) as IRequestsConfigKeys).forEach((name) => {
     results[name] = {
       status: 'init',
       data: null,
@@ -14,10 +57,8 @@ export default function(configs) {
     };
   });
 
-  function getValue(name: string) {
-    const { params: configParams, response: configResponse, ...configValues } = config;
-    const { params: requestParams, response: requestResponse, ...requestValues  } = requests[name];
-    const values = merge({}, configValues, requestValues);
+  function getValue<K extends IRequestsConfigKey>(name: K): IConfig & IRequestsConfig[K] {
+    const values = merge({}, config, requests[name as string]);
     const { options, dataHandler } = values;
     const transformResponse = options.transformResponse || [];
     if (dataHandler) {
@@ -41,7 +82,7 @@ export default function(configs) {
     };
   }
 
-  function useRequest(name: string) {
+  function useRequest<K extends IRequestsConfigKey>(name: K) {
     const { type, options } = getValue(name);
     const state = useIceRequest(options);
     const { error, data, status } = state as any;
@@ -53,9 +94,14 @@ export default function(configs) {
     return state;
   }
 
-  function getRequest(name: string) {
+  function getRequest<K extends IRequestsConfigKey>(name: K) {
+    type FinalConfig = IConfig & IRequestsConfig[K];
+    // @todo
+    // type FinalConfigDataHandle = PropType<FinalConfig, 'dataHandler'>;
+    // type ReturnData = ReturnType<FinalConfigDataHandle>;
+    type ReturnData = any; // InferProps<FinalConfig, 'response'>;
     const { type, options } = getValue(name);
-    return async (params?) => {
+    return async (params?: InferProps<FinalConfig, 'params'>): Promise<ReturnData> => {
       let data;
       results[name].status = 'loading';
       try {
@@ -77,7 +123,7 @@ export default function(configs) {
     };
   }
 
-  function getResult(name: string) {
+  function getResult<K extends IRequestsConfigKey>(name: K) {
     return Object.assign({}, results[name]);
   }
 

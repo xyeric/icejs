@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { store } from 'ice';
+import { store, services } from 'ice';
 import styles from './index.module.scss';
-import todo from '../../services/todo';
-import createService from '../../createService';
+// import todo from '../../services/todo';
+// import createService from '../../createService';
 
-const service = createService(todo);
+// const service = createService(todo);
+const service = services.todo;
 service.bindModel(store.getModel('todos'));
 
 const Guide = () => {
@@ -13,16 +14,16 @@ const Guide = () => {
   service.useInit();
 
   React.useEffect(() => {
-    // request();
+    request();
   }, []);
 
   console.log(loading, data);
   console.log('state', state);
 
   async function handleRequest() {
-    const request = service.getRequest('getAll');
-    const data = await request();
-    console.log(data);
+    const request = service.getRequest('addTodo');
+    const data = await request({ title: 'a' });
+    console.log('handleRequest', data);
   }
 
   function handleGetResult() {

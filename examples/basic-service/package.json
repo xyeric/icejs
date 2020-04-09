@@ -1,9 +1,8 @@
 {
-  "name": "example-hello-world",
-  "description": "hello world",
+  "name": "example-basic-service",
+  "description": "service with icejs",
   "dependencies": {
     "ice.js": "^1.0.0",
-    "lodash.merge": "^4.6.2",
     "react": "^16.4.1",
     "react-dom": "^16.4.1"
   },

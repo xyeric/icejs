@@ -20,5 +20,9 @@ export default async function (api) {
   onGetWebpackConfig((config) => {
     // add alias for module.ts use $ice/axiosInstance
     config.resolve.alias.set('$ice/axiosInstance', path.join(distPath, 'axiosInstance.ts'));
+
+    // add alias for other plugins
+    config.resolve.alias.set('$ice/request', path.join(distPath, 'request.ts'));
+    config.resolve.alias.set('$ice/useRequest', path.join(distPath, 'useRequest.ts'));
   });
 }

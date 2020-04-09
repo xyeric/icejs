@@ -1,0 +1,14 @@
+<% if (importStr) { %>
+  import { createService } from 'ice';
+  <%- importStr %>
+
+  const configs = { <%- servicesStr %> };
+
+  const services = {};
+  Object.keys(configs).forEach((name) => {
+    const config = configs[name];
+    services[name] = createService(config);
+  });
+
+  export default services;
+<% } %>
