@@ -92,7 +92,7 @@ function renderApp(config: IAppConfig, context: IContext) {
   const runtime = new RuntimeModule(config, <%- buildConfig %>, context)
   loadModlues(runtime);
   const { appConfig, modifyDOMRender } = runtime
-  const { rootId, mountNode } = appConfig.app
+  const { rootId, mountNode, ErrorBoundaryFallback, onErrorBoundaryHander } = appConfig.app
   const AppProvider = runtime.composeAppProvider();
   const AppRouter = runtime.getAppRouter();
 
@@ -100,7 +100,7 @@ function renderApp(config: IAppConfig, context: IContext) {
     const appRouter = <AppRouter />;
     const rootApp = AppProvider ? <AppProvider>{appRouter}</AppProvider> : appRouter;
     return (
-      <ErrorBoundary>
+      <ErrorBoundary Fallback={ErrorBoundaryFallback} onError={onErrorBoundaryHander}>
         {rootApp}
       </ErrorBoundary>
     )
