@@ -19,7 +19,7 @@ interface IState {
 };
 
 class ErrorBoundary extends React.Component<IProps, IState> {
-  static defaultProps = {
+  static defaultProps: IProps = {
     Fallback: ErrorBoundaryFallback,
   };
 
