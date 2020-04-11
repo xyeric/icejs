@@ -1,6 +1,6 @@
 {
   "name": "example-basic-service",
-  "description": "service with icejs",
+  "description": "service for icejs",
   "dependencies": {
     "ice.js": "^1.0.0",
     "react": "^16.4.1",

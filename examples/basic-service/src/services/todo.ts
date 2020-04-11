@@ -63,7 +63,7 @@ export default {
   },
 
   // 互转字段，用户处理初始化请求的数据
-  dataHandler(dataMap, error) {
+  dataHandler(dataMap) {
     return { dataSources: dataMap.getAll };
   },
 };

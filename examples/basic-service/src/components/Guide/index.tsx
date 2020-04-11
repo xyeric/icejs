@@ -9,17 +9,19 @@ const Guide = () => {
 
   React.useEffect(() => {
     request();
+
+  // eslint-disable-next-lint
   }, []);
 
   async function handleRequest() {
-    const request = service.getRequest('addTodo');
-    const data = await request({ title: 'a' });
-    console.log('handleRequest', data);
+    const requestAddTodo = service.getRequest('addTodo');
+    const addTodoResult = await requestAddTodo({ title: 'a' });
+    console.log('handleRequest', addTodoResult);
   }
 
   function handleGetResult() {
-    const result = service.getResult('addTodo');
-    console.log('handleGetResult', result);
+    const resultForAddTodo = service.getResult('addTodo');
+    console.log('handleGetResult', resultForAddTodo);
   }
 
   console.log(loading, data);
