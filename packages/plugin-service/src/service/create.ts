@@ -1,8 +1,8 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
-import iceRequest from '@ice/request';
-import useIceRequest from '@ice/useRequest';
 import * as merge from 'lodash.merge';
+import iceRequest from '$ice/request';
+import useIceRequest from '$ice/useRequest';
 
 type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 

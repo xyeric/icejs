@@ -5,7 +5,7 @@
   "author": "alvinhui <alvin.hui@qq.com>",
   "homepage": "https://github.com/ice-lab/icejs#readme",
   "license": "MIT",
-  "main": "lib/plugin-service.js",
+  "main": "lib/index.js",
   "dependencies": {
     "lodash.merge": "^4.6.2",
     "prop-types": "^15.7.2"

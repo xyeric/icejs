@@ -5,8 +5,8 @@
     "rootDir": "src",
     "outDir": "lib",
     "paths": {
-      "@ice/request": ["./src/_request"],
-      "@ice/useRequest": ["./src/_useRequest"]
+      "$ice/request": ["./src/_request"],
+      "$ice/useRequest": ["./src/_useRequest"]
     }
   },
 }

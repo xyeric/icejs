@@ -1,17 +1,12 @@
 import * as React from 'react';
 import { store, services } from 'ice';
 import styles from './index.module.scss';
-// import todo from '../../services/todo';
-// import createService from '../../createService';
 
-// const service = createService(todo);
 const service = services.todo;
-service.bindModel(store.getModel('todos'));
 
 const Guide = () => {
   const { request, data, loading } = service.useRequest('getAll');
   const [ state ] = store.useModel('todos');
-  service.useInit();
 
   React.useEffect(() => {
     request();
@@ -27,8 +22,8 @@ const Guide = () => {
   }
 
   function handleGetResult() {
-    const result = service.getResult('getAll');
-    console.log(result);
+    const result = service.getResult('addTodo');
+    console.log('handleGetResult', result);
   }
 
   return (
@@ -36,10 +31,10 @@ const Guide = () => {
       <h2 className={styles.title}>Welcome to icejs!</h2>
       <div>
         <button type="button" onClick={handleRequest}>
-          请求数据
+          添加任务
         </button>
         <button type="button" onClick={handleGetResult}>
-          获取请求结果
+          获取添加任务的结果
         </button>
       </div>
     </div>
