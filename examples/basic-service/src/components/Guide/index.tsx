@@ -5,7 +5,7 @@ import styles from './index.module.scss';
 const service = services.todo;
 
 const Guide = () => {
-  const { request, data, loading } = service.useRequest('getAll');
+  const { status, request, data, loading } = service.useRequest('getAll');
 
   React.useEffect(() => {
     request();
@@ -24,7 +24,7 @@ const Guide = () => {
     console.log('handleGetResult', resultForAddTodo);
   }
 
-  console.log(loading, data);
+  console.log(status, loading, data);
 
   return (
     <div className={styles.container}>

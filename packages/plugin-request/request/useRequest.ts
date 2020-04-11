@@ -16,7 +16,8 @@ function useRequest(options: AxiosRequestConfig) {
   const initialState = {
     data: null,
     loading: false,
-    error: null
+    error: null,
+    status: 'init',
   };
   const [state, dispatch] = useReducer(requestReducer, initialState);
 
@@ -27,7 +28,7 @@ function useRequest(options: AxiosRequestConfig) {
   const request = useCallback(async (config?: AxiosRequestConfig) => {
     try {
       dispatch({
-        type: 'init'
+        type: 'loading'
       });
 
       const response = await axiosInstance({
@@ -36,7 +37,7 @@ function useRequest(options: AxiosRequestConfig) {
       });
 
       dispatch({
-        type: 'success',
+        type: 'loaded',
         data: response.data
       });
       return response.data;
@@ -64,30 +65,29 @@ function useRequest(options: AxiosRequestConfig) {
  */
 function requestReducer(state, action) {
   switch (action.type) {
-    case 'init':
+    case 'loading':
       return {
         data: null,
         error: null,
-        loading: true
+        loading: true,
+        status: action.type,
       };
-    case 'success':
+    case 'loaded':
       return {
         data: action.data,
         error: null,
-        loading: false
+        loading: false,
+        status: action.type,
       };
     case 'error':
       return {
         data: null,
         error: action.error,
-        loading: false
+        loading: false,
+        status: action.type,
       };
     default:
-      return {
-        data: null,
-        error: null,
-        loading: false
-      };
+      throw new Error();
   }
 }
 
