@@ -1,19 +1,15 @@
 import * as React from 'react';
-import { store, services } from 'ice';
+import { services } from 'ice';
 import styles from './index.module.scss';
 
 const service = services.todo;
 
 const Guide = () => {
   const { request, data, loading } = service.useRequest('getAll');
-  const [ state ] = store.useModel('todos');
 
   React.useEffect(() => {
     request();
   }, []);
-
-  console.log(loading, data);
-  console.log('state', state);
 
   async function handleRequest() {
     const request = service.getRequest('addTodo');
@@ -25,6 +21,8 @@ const Guide = () => {
     const result = service.getResult('addTodo');
     console.log('handleGetResult', result);
   }
+
+  console.log(loading, data);
 
   return (
     <div className={styles.container}>
