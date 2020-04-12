@@ -214,13 +214,13 @@ export default class Generator {
       // e.g: src/pages/${pageName}/model.ts
       const pageModelFile = path.join(pageNameDir, `model.${this.projectType}`);
 
-      const parmas = { pageName, pageNameDir, pageModelsDir, pageModelFile, pageComponentFiles };
+      const params = { pageName, pageNameDir, pageModelsDir, pageModelFile, pageComponentFiles };
 
       // generate .ice/pages/${pageName}/store.ts
-      this.renderPageStore(parmas);
+      this.renderPageStore(params);
 
       // generate .ice/pages/${pageName}/${pageName}.tsx
-      this.renderPageComponent(parmas);
+      this.renderPageComponent(params);
 
       // generate .ice/pages/${pageName}/componentStore.ts
       this.renderComponentStore(pageName, pageComponentDir, pageComponentFiles);
