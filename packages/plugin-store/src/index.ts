@@ -15,8 +15,7 @@ export default async (api) => {
   const typesTemplatePath = path.join(templatePath, 'types.ts.ejs');
   const projectType = getValue('PROJECT_TYPE');
 
-  // copy types/index.ts to .ice/store/index.ts
-  await fse.copy(path.join(__dirname, '..', 'src/types'), path.join(targetPath, './store'));
+  // set IStore to IAppConfig
   applyMethod('addIceTypesExport', { source: './store', specifier: '{ IStore }', exportName: 'store?: IStore' });
 
   // render template/types.ts.ejs to .ice/store/types.ts
@@ -38,8 +37,7 @@ export default async (api) => {
       ]);
     }
 
-    config.resolve.alias.set('$ice/appStore', path.join(targetPath, 'appStore.ts'));
-    config.resolve.alias.set('$ice/pageStores', path.join(targetPath, 'pageStores.ts'));
+    config.resolve.alias.set('$ice/store', path.join(targetPath, 'store', 'index.ts'));
   });
 
   const gen = new Generator({

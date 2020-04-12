@@ -1,5 +1,5 @@
-import Home from '@/pages/Home';
-import About from '@/pages/About';
+import Home from 'ice/Home/Home';
+import About from 'ice/About/About';
 
 export default [
   {

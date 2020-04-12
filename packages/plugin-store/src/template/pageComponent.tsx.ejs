@@ -1,0 +1,22 @@
+import * as React from 'react';
+<%- pageComponentImport %>
+
+<% if(hasStore) { %>
+  import store from './store';
+
+  const { Provider } = store;
+  const PageComponentName = <%= pageComponentExport %>;
+
+  const StoreWrapperedPage = () => {
+    return (
+      <Provider>
+        <PageComponentName />
+      </Provider>
+    )
+  }
+
+  StoreWrapperedPage.pageConfig = PageComponentName.pageConfig || {};
+  export default StoreWrapperedPage;
+<% } else { %>
+  export default <%= pageComponentExport %>;
+<% } %>
