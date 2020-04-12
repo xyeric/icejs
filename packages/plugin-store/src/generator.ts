@@ -164,13 +164,13 @@ export default class Generator {
       // example: src/pages/${pageName}/model.ts
       const pageModelFile = path.join(pageNameDir, `model.${this.projectType}`);
 
-      const parmas = { pageName, pageNameDir, pageModelsDir, pageModelFile };
+      const params = { pageName, pageNameDir, pageModelsDir, pageModelFile };
 
       // generate .ice/pages/${pageName}/store.ts
-      this.renderPageStore(parmas);
+      this.renderPageStore(params);
 
       // generate .ice/pages/${pageName}/${pageName}.tsx
-      this.renderPageComponent(parmas);
+      this.renderPageComponent(params);
     });
   }
 }
