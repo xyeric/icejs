@@ -12,5 +12,14 @@ export default {
   },
   useDispatchers() {
     return store.useModelDispatchers(modelName)
+  },
+  getValue() {
+    return store.getModel(modelName)
+  },
+  getState() {
+    return store.getModelState(modelName)
+  },
+  getDispatchers() {
+    return store.getModelDispatchers(modelName)
   }
 }
