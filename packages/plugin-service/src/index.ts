@@ -11,7 +11,8 @@ export default async (api) => {
 
   // move requst to .ice/request
   await fse.copy(srcPath, distPath);
-  applyMethod('addIceExport', { source: './service/create', exportName: 'createService' });
+  applyMethod('addIceExport', { source: './service/createService', exportName: 'createService' });
+  applyMethod('addIceExport', { source: './service/createServices', exportName: 'createServices' });
 
   const targetPath = getValue('ICE_TEMP');
   const templatePath = path.join(__dirname, 'template');

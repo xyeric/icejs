@@ -1,18 +1,21 @@
 import PropTypes from 'prop-types';
 
+const configResponse = {
+  success: PropTypes.bool.isRequired,
+  data: PropTypes.object.isRequired,
+  errorCode: PropTypes.string,
+  errorMsg: PropTypes.string,
+};
+
+type ConfigResponse = PropTypes.InferProps<typeof configResponse>;
 const config = {
   options: {
     baseURL: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB',
     method: 'get',
     timeout: 3000,
   },
-  response: {
-    success: PropTypes.bool.isRequired,
-    data: PropTypes.object.isRequired,
-    errorCode: PropTypes.string,
-    errorMsg: PropTypes.string,
-  },
-  dataHandler(response) {
+  response: configResponse,
+  dataHandler(response: ConfigResponse) {
     return response.data;
   },
 };
@@ -33,6 +36,14 @@ const getAll = {
   },
 };
 
+const addTodoResponse = {
+  data: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    done: PropTypes.bool,
+  }),
+};
+type AddTodoResponse = PropTypes.InferProps<typeof addTodoResponse>;
 const addTodo = {
   options: {
     url: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB/addTodo', // 直接设置 url
@@ -46,12 +57,9 @@ const addTodo = {
     title: PropTypes.string.isRequired,
     done: PropTypes.bool
   },
-  response: {
-    data: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      done: PropTypes.bool,
-    }),
+  response: addTodoResponse,
+  dataHandler(response: AddTodoResponse) {
+    return response.data;
   },
 };
 

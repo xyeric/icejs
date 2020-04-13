@@ -8,7 +8,9 @@
   "main": "lib/index.js",
   "dependencies": {
     "lodash.merge": "^4.6.2",
-    "prop-types": "^15.7.2"
+    "lodash.transform": "^4.6.0",
+    "prop-types": "^15.7.2",
+    "utility-types": "^3.10.0"
   },
   "directories": {
     "lib": "lib",

@@ -1,18 +1,22 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import * as merge from 'lodash.merge';
+import { Assign } from 'utility-types';
 import iceRequest from '$ice/request/request';
 import useIceRequest from '$ice/request/useRequest';
 
 type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 
-type DataHandler = <T = any>(response: T) => T;
+type Options = Record<string ,any>;
+type Params = Record<string ,any>;
+type Response = Record<string ,any>;
+type DataHandler = (response: any) => any;
 
 interface BaseConfing {
   type?: string;
-  options: any;
-  params?: any;
-  response?: any;
+  options: Options;
+  params?: Params;
+  response?: Response;
   dataHandler?: DataHandler;
 }
 
@@ -24,7 +28,7 @@ interface RequestConfig extends BaseConfing {
   isInit?: boolean;
 }
 
-interface Configs {
+export interface Configs {
   config: Config;
   requests: {
     [name: string]: RequestConfig;
@@ -32,23 +36,42 @@ interface Configs {
   dataHandler?(dataMap, error): any;
 }
 
-type InferProps<Value, Key extends keyof Value> = PropTypes.InferProps<PropType<Value, Key>>;
+interface Result {
+  status: 'init'|'loaded'|'loading'|'error';
+  data: any;
+  error: Error | null;
+}
 
-export default function<C extends Configs>(configs: C) {
+export interface Service<
+  C extends Configs,
+> {
+  useRequest: <K extends keyof C["requests"]>(name: K) => ReturnType<typeof useIceRequest>;
+  getRequest:
+  <K extends keyof C["requests"]>
+  (name: K) =>
+  ( params?: PropTypes.InferProps<Assign<C["config"]["params"], C["requests"][K]["params"]>> ) =>
+  Promise<
+  C["requests"][K]["dataHandler"] extends DataHandler
+    ? ReturnType<C["requests"][K]["dataHandler"]>
+    : C["config"]["dataHandler"] extends DataHandler
+      ? ReturnType<C["config"]["dataHandler"]>
+      : PropTypes.InferProps<Assign<C["config"]["response"], C["requests"][K]["response"]>>
+  >;
+  getResult: <K extends keyof C["requests"]>(name: K) => Result;
+  bindModel: (model: any) => void;
+  useInit: () => void;
+  reloadInit: () => Promise<void>;
+}
+
+export default function<C extends Configs>(configs: C): Service<C> {
   type IRequestsConfig = PropType<C, 'requests'>;
   type IConfig = PropType<C, 'config'>;
   type IRequestsConfigKey = keyof IRequestsConfig;
   type IRequestsConfigKeys = IRequestsConfigKey[];
-  type Results<R> = {
-    [K in keyof R]: {
-      status: string;
-      data: any;
-      error: Error | null;
-    }
-  }
+
   const { config, requests, dataHandler } = configs;
 
-  const results: Results<IRequestsConfig> = {} as any;
+  const results: any = {};
   (Object.keys(requests) as IRequestsConfigKeys).forEach((name) => {
     results[name] = {
       status: 'init',
@@ -85,7 +108,7 @@ export default function<C extends Configs>(configs: C) {
   function useRequest<K extends IRequestsConfigKey>(name: K) {
     const { type, options } = getValue(name);
     const state = useIceRequest(options);
-    const { error, data, status } = state as any;
+    const { error, data, status } = state;
     results[name] = {
       data,
       error,
@@ -95,13 +118,8 @@ export default function<C extends Configs>(configs: C) {
   }
 
   function getRequest<K extends IRequestsConfigKey>(name: K) {
-    type FinalConfig = IConfig & IRequestsConfig[K];
-    // @todo
-    // type FinalConfigDataHandle = PropType<FinalConfig, 'dataHandler'>;
-    // type ReturnData = ReturnType<FinalConfigDataHandle>;
-    type ReturnData = any; // InferProps<FinalConfig, 'response'>;
     const { type, options } = getValue(name);
-    return async (params?: InferProps<FinalConfig, 'params'>): Promise<ReturnData> => {
+    return async (params) => {
       let data;
       results[name].status = 'loading';
       try {

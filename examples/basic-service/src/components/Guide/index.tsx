@@ -5,18 +5,22 @@ import styles from './index.module.scss';
 const service = services.todo;
 
 const Guide = () => {
-  const { status, request, data, loading } = service.useRequest('getAll');
+  const { status, request, data, loading, error } = service.useRequest('getAll');
 
   React.useEffect(() => {
     request();
 
   // eslint-disable-next-lint
-  }, []);
+  }, [request]);
 
   async function handleRequest() {
     const requestAddTodo = service.getRequest('addTodo');
     const addTodoResult = await requestAddTodo({ title: 'a' });
     console.log('handleRequest', addTodoResult);
+
+    const requestGetAll = service.getRequest('getAll');
+    const getAllResult = await requestGetAll();
+    console.log('handleRequest', getAllResult);
   }
 
   function handleGetResult() {
@@ -24,7 +28,7 @@ const Guide = () => {
     console.log('handleGetResult', resultForAddTodo);
   }
 
-  console.log(status, loading, data);
+  console.log(status, loading, data, error);
 
   return (
     <div className={styles.container}>

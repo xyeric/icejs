@@ -25,7 +25,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "ice": [".ice/index.ts"],
-      "ice/*": [".ice/pages/*"]
+      "ice/*": [".ice/pages/*"],
+      "$ice/*": [".ice/*"]
     }
   },
   "include": ["src/*", ".ice", "src/components/Guide"],
