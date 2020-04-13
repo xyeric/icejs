@@ -3,8 +3,8 @@ import * as ReactDOM from 'react-dom';
 import * as ReactDOMServer from 'react-dom/server';
 import { createBrowserHistory, createHashHistory, createMemoryHistory, History } from '$ice/history';
 import deepmerge from 'deepmerge';
-import ErrorBoundary from './components/ErrorBoundary';
 import RuntimeModule from './runtimeModule';
+import { ErrorBoundary } from './components';
 import { setAppConfig } from './appConfig';
 import { IAppConfig } from './types';
 <% if (globalStyle) {%>import '../<%= globalStyle %>'<% } %>
@@ -92,18 +92,22 @@ function renderApp(config: IAppConfig, context: IContext) {
   const runtime = new RuntimeModule(config, <%- buildConfig %>, context)
   loadModlues(runtime);
   const { appConfig, modifyDOMRender } = runtime
-  const { rootId, mountNode, ErrorBoundaryFallback, onErrorBoundaryHander } = appConfig.app
+  const { rootId, mountNode, ErrorBoundaryFallback, onErrorBoundaryHander, errorBoundary } = appConfig.app
   const AppProvider = runtime.composeAppProvider();
   const AppRouter = runtime.getAppRouter();
 
   function App() {
     const appRouter = <AppRouter />;
     const rootApp = AppProvider ? <AppProvider>{appRouter}</AppProvider> : appRouter;
-    return (
-      <ErrorBoundary Fallback={ErrorBoundaryFallback} onError={onErrorBoundaryHander}>
-        {rootApp}
-      </ErrorBoundary>
-    )
+    if (errorBoundary) {
+      return (
+        <ErrorBoundary Fallback={ErrorBoundaryFallback} onError={onErrorBoundaryHander}>
+          {rootApp}
+        </ErrorBoundary>
+      )
+    }
+
+    return rootApp;
   }
 
   if (process.env.__IS_SERVER__) {
