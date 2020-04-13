@@ -1,6 +1,6 @@
 /* eslint @typescript-eslint/explicit-member-accessibility:0 */
 import React, { PureComponent } from 'react';
-import { withErrorBoundary } from 'ice';
+import { ErrorBoundary } from 'ice';
 
 class Todo extends PureComponent {
   componentDidMount() {
@@ -9,11 +9,13 @@ class Todo extends PureComponent {
 
   render() {
     return (
-      <div>
-        TODO Component
-      </div>
+      <ErrorBoundary>
+        <div>
+          TODO Component
+        </div>
+      </ErrorBoundary>
     );
   }
 }
 
-export default withErrorBoundary(Todo);
+export default Todo;
