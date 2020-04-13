@@ -6,7 +6,6 @@ const configResponse = {
   errorCode: PropTypes.string,
   errorMsg: PropTypes.string,
 };
-
 type ConfigResponse = PropTypes.InferProps<typeof configResponse>;
 const config = {
   options: {
@@ -21,7 +20,6 @@ const config = {
 };
 
 const getAll = {
-  isInit: true, // 互转字段：初始化数据
   options: {
     url: '/getAll',
   },
@@ -68,10 +66,5 @@ export default {
   requests: {
     getAll,
     addTodo,
-  },
-
-  // 互转字段，用户处理初始化请求的数据
-  dataHandler(dataMap) {
-    return { dataSources: dataMap.getAll };
   },
 };
