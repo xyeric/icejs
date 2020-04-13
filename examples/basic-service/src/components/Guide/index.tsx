@@ -16,16 +16,19 @@ const Guide = () => {
   async function handleRequest() {
     const requestAddTodo = service.getRequest('addTodo');
     const addTodoResult = await requestAddTodo({ title: 'a' });
-    console.log('handleRequest', addTodoResult);
+    console.log('addTodoResult', addTodoResult);
 
     const requestGetAll = service.getRequest('getAll');
     const getAllResult = await requestGetAll();
-    console.log('handleRequest', getAllResult);
+    console.log('getAllResult', getAllResult);
   }
 
   function handleGetResult() {
     const resultForAddTodo = service.getResult('addTodo');
-    console.log('handleGetResult', resultForAddTodo);
+    console.log('resultForAddTodo', resultForAddTodo);
+
+    const resultForGetAll = service.getResult('getAll');
+    console.log('resultForGetAll', resultForGetAll);
   }
 
   console.log(status, loading, data, error);
@@ -35,10 +38,10 @@ const Guide = () => {
       <h2 className={styles.title}>Welcome to icejs!</h2>
       <div>
         <button type="button" onClick={handleRequest}>
-          添加任务
+          请求数据
         </button>
         <button type="button" onClick={handleGetResult}>
-          获取添加任务的结果
+          获取请求的结果
         </button>
       </div>
     </div>
