@@ -28,7 +28,7 @@ interface RequestConfig extends BaseConfing {
   isInit?: boolean;
 }
 
-export interface Configs {
+export interface ServiceConfigs {
   config: Config;
   requests: {
     [name: string]: RequestConfig;
@@ -43,7 +43,7 @@ interface Result {
 }
 
 export interface Service<
-  C extends Configs,
+  C extends ServiceConfigs,
 > {
   useRequest: <K extends keyof C["requests"]>(name: K) => ReturnType<typeof useIceRequest>;
   getRequest:
@@ -63,7 +63,7 @@ export interface Service<
   reloadInit: () => Promise<void>;
 }
 
-export default function<C extends Configs>(configs: C): Service<C> {
+export default function<C extends ServiceConfigs>(configs: C): Service<C> {
   type IRequestsConfig = PropType<C, 'requests'>;
   type IConfig = PropType<C, 'config'>;
   type IRequestsConfigKey = keyof IRequestsConfig;

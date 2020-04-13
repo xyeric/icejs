@@ -1,14 +1,14 @@
 
 import * as transform from 'lodash.transform';
-import createService, { Configs, Service } from './createService';
+import createService, { ServiceConfigs, Service } from './createService';
 
 
-interface AllConfigs {
-  [key: string]: Configs;
+interface ServicesConfigs {
+  [name: string]: ServiceConfigs;
 }
 
-export default function<A extends AllConfigs>(allConfigs: A) {
-  const services: { [K in keyof A]: Service<A[K]> } = transform(allConfigs, (result, config, namespace) => {
+export default function<S extends ServicesConfigs>(servicesConfigs: S) {
+  const services: { [K in keyof S]: Service<S[K]> } = transform(servicesConfigs, (result, config, namespace) => {
     result[namespace] = createService(config);
   });
   return services;

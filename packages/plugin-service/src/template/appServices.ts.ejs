@@ -2,7 +2,5 @@
   import { createServices } from 'ice';
   <%- importStr %>
 
-  const configs = { <%- servicesStr %> };
-
-  export default createServices(configs);
+  export default createServices({ <%- servicesStr %> });
 <% } %>
