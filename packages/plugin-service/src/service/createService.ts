@@ -45,19 +45,19 @@ interface Result {
 export interface Service<
   C extends ServiceConfigs,
 > {
-  useRequest: <K extends keyof C["requests"]>(name: K) => ReturnType<typeof useIceRequest>;
+  useRequest: <K extends keyof C['requests']>(name: K) => ReturnType<typeof useIceRequest>;
   getRequest:
-  <K extends keyof C["requests"]>
+  <K extends keyof C['requests']>
   (name: K) =>
-  ( params?: PropTypes.InferProps<Assign<C["config"]["params"], C["requests"][K]["params"]>> ) =>
+  ( params?: PropTypes.InferProps<Assign<C['config']['params'], C['requests'][K]['params']>> ) =>
   Promise<
-  C["requests"][K]["dataHandler"] extends DataHandler
-    ? ReturnType<C["requests"][K]["dataHandler"]>
-    : C["config"]["dataHandler"] extends DataHandler
-      ? ReturnType<C["config"]["dataHandler"]>
-      : PropTypes.InferProps<Assign<C["config"]["response"], C["requests"][K]["response"]>>
+  C['requests'][K]['dataHandler'] extends DataHandler
+    ? ReturnType<C['requests'][K]['dataHandler']>
+    : C['config']['dataHandler'] extends DataHandler
+      ? ReturnType<C['config']['dataHandler']>
+      : PropTypes.InferProps<Assign<C['config']['response'], C['requests'][K]['response']>>
   >;
-  getResult: <K extends keyof C["requests"]>(name: K) => Result;
+  getResult: <K extends keyof C['requests']>(name: K) => Result;
   bindModel: (model: any) => void;
   useInit: () => void;
   reloadInit: () => Promise<void>;
@@ -86,13 +86,12 @@ export default function<C extends ServiceConfigs>(configs: C): Service<C> {
     const transformResponse = options.transformResponse || [];
     if (dataHandler) {
       transformResponse.push(function(response) {
-        let result;
         try {
-          result = JSON.parse(response);
-          return dataHandler(result);
-        } catch (e) {
-          // ignore error
-        }
+          if (typeof response === 'string') {
+            response = JSON.parse(response);
+          }
+          return dataHandler(response);
+        } catch (e) { /* Ignore */ }
         return response;
       });
     }
