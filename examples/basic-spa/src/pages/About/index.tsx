@@ -24,7 +24,9 @@ const About = () => {
       <ErrorBoundary onError={myErrorHandler} Fallback={MyFallbackComponent}>
         <Child />
       </ErrorBoundary>
-      <Todo />
+      <ErrorBoundary>
+        <Todo />
+      </ErrorBoundary>
       <Link to="/dashboard">dashboard</Link><br />
       <Link to="/">Home</Link>
     </>
