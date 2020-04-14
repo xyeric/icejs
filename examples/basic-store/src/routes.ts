@@ -1,5 +1,7 @@
-import Home from 'ice/Home/Home';
-import About from 'ice/About/About';
+import { lazy } from 'ice';
+
+const Home = lazy(() => import('ice/Home/Home'));
+const About =lazy (() => import('ice/About/About'));
 
 export default [
   {
