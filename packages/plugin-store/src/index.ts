@@ -35,7 +35,7 @@ export default async (api) => {
   const hasRouteFile = fse.existsSync(routeConfigPath);
   const routeTempPath = path.join(targetPath, `routes.${projectType}`);
   const routeFile = hasRouteFile ? routeConfigPath : routeTempPath;
-  modifyUserConfig('babelPlugins', [...(userConfig.babelPlugins as [] || []), [require.resolve('./babelPluginReplace'), { routeFile }]]);
+  modifyUserConfig('babelPlugins', [...(userConfig.babelPlugins as [] || []), [require.resolve('./babelPluginReplacePath'), { routeFile }]]);
 
   onGetWebpackConfig(config => {
     if (command === 'build') {

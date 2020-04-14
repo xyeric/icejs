@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 module.exports = ({ types: t }, { routeFile }) => {
   return {
     visitor: {
@@ -6,13 +5,26 @@ module.exports = ({ types: t }, { routeFile }) => {
         const isRouteFile = (routeFile === state.filename);
         if (isRouteFile) {
           let value = path.node.source.value;
-          // source: import Home from '@/pages/Home';
-          // source: import Home from '../pages/Home'
           if (typeof value === 'string') {
+            // e.g: import Home from '@/pages/Home';
+            // e.g: import Home from '../pages/Home'
             if (value.startsWith("@/pages") || value.startsWith("../pages")) {
               const pageName = value.split("/")[2];
               // replace to: import Home from 'ice/Home/Home'
               value = `ice/${pageName}/${pageName}`;
+              path.replaceWith(
+                t.ImportDeclaration(
+                  path.node.specifiers,
+                  t.stringLiteral(value)
+                )
+              );
+            }
+
+            // e.g: import Home from '../src/pages/Home/index.tsx';
+            if (value.startsWith("../src/pages")) {
+              const pageName = value.split("/")[3];
+              // replace to: import Home from './pages/Home/Home'
+              value = `./pages/${pageName}/${pageName}`;
               path.replaceWith(
                 t.ImportDeclaration(
                   path.node.specifiers,
@@ -30,13 +42,21 @@ module.exports = ({ types: t }, { routeFile }) => {
           const args = path.node.arguments;
           for (let i = 0; i < args.length; i++) {
             let value = args[i].value;
-            // const Home = lazy(() => import('@/pages/Home'));
-            // const Home =lazy (() => import('../pages/Home'));
             if (typeof value === 'string') {
+              // e.g: const Home = lazy(() => import('@/pages/Home'));
+              // e.g: Home =lazy (() => import('../pages/Home'));
               if (value.startsWith("@/pages") || value.startsWith("../pages")) {
                 const pageName = value.split("/")[2];
                 // replace to: const Home =lazy (() => import('ice/Home/Home'));
                 value = `ice/${pageName}/${pageName}`;
+                args[i].value = value;
+              }
+
+              // e.g: const Home = lazy(() => import(/* webpackChunkName: 'Home' */ '../src/pages/Home/index.tsx'));
+              if (value.startsWith("../src/pages")) {
+                const pageName = value.split("/")[3];
+                // replace to: import Home from './pages/Home/Home'
+                value = `./pages/${pageName}/${pageName}`;
                 args[i].value = value;
               }
             }
