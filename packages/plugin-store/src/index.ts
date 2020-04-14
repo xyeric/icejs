@@ -4,8 +4,8 @@ import * as ejs from 'ejs';
 import Generator from './generator';
 
 export default async (api) => {
-  const { context, getValue, onHook, applyMethod, onGetWebpackConfig } = api;
-  const { rootDir, command } = context;
+  const { context, getValue, onHook, applyMethod, onGetWebpackConfig, modifyUserConfig } = api;
+  const { rootDir, command, userConfig } = context;
 
   const targetPath = getValue('ICE_TEMP');
   const templatePath = path.join(__dirname, 'template');
@@ -25,6 +25,17 @@ export default async (api) => {
   fse.ensureFileSync(typesTargetPath);
   fse.writeFileSync(typesTargetPath, content, 'utf-8');
   applyMethod('addIceTypesExport', { source: './store/types' });
+
+  // add babel plugins for ice lazy
+  const routerOptions = userConfig.router || {};
+  const { configPath } = routerOptions;
+  const routeConfigPath = configPath
+    ? path.join(rootDir, configPath)
+    : path.join(rootDir, `src/routes.${projectType}`);
+  const hasRouteFile = fse.existsSync(routeConfigPath);
+  const routeTempPath = path.join(targetPath, `routes.${projectType}`);
+  const routeFile = hasRouteFile ? routeConfigPath : routeTempPath;
+  modifyUserConfig('babelPlugins', [...(userConfig.babelPlugins as [] || []), [require.resolve('./babelPluginReplace'), { routeFile }]]);
 
   onGetWebpackConfig(config => {
     if (command === 'build') {
