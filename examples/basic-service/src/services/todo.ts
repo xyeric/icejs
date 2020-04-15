@@ -1,70 +1,70 @@
-import PropTypes from 'prop-types';
+import { createService } from 'ice';
 
-const configResponse = {
-  success: PropTypes.bool.isRequired,
-  data: PropTypes.object.isRequired,
-  errorCode: PropTypes.string,
-  errorMsg: PropTypes.string,
-};
-type ConfigResponse = PropTypes.InferProps<typeof configResponse>;
-const config = {
-  options: {
-    baseURL: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB',
-    method: 'get',
-    timeout: 3000,
-  },
-  response: configResponse,
-  dataHandler(response: ConfigResponse) {
-    return response.data;
-  },
-};
+export interface GetOneParams {
+  id: string;
+}
+
+export interface AddParams {
+  title: string;
+  done?: boolean;
+}
+
+export interface OriginTodo {
+  id: string;
+  title: string;
+  done: boolean;
+  label?: string;
+}
+
+export interface Todo extends OriginTodo {
+  label: string;
+}
+
+export type Todos = OriginTodo[];
+
+function transformTodo(todo: OriginTodo): Todo {
+  return {
+    ...todo,
+    label: todo.done ? '已完成' : '未完成',
+  };
+}
+
+interface Types {
+  getOne(params: GetOneParams): Todo;
+  getAll(): Todos;
+  add(params: AddParams): Todo;
+}
 
 const getAll = {
   options: {
-    url: '/getAll',
-  },
-  response: {
-    data: PropTypes.arrayOf(
-      PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired,
-        done: PropTypes.bool,
-      })
-    ),
+    url: '/todo_getAll',
   },
 };
 
-const addTodoResponse = {
-  data: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    done: PropTypes.bool,
-  }),
-};
-type AddTodoResponse = PropTypes.InferProps<typeof addTodoResponse>;
-const addTodo = {
+const getOne = {
   options: {
-    url: 'https://mocks.alibaba-inc.com/mock/D8iUX7zB/addTodo', // 直接设置 url
+    url: '/todo_getOne',
+  },
+  dataHandle: transformTodo,
+};
+
+const add = {
+  options: {
+    url: '/todo_add',
     method: 'post',
-    timeout: 5000,
-    headers: {
-
-    },
   },
-  params: {
-    title: PropTypes.string.isRequired,
-    done: PropTypes.bool
-  },
-  response: addTodoResponse,
-  dataHandler(response: AddTodoResponse) {
-    return response.data;
-  },
+  dataHandle: transformTodo,
 };
 
-export default {
-  config,
-  requests: {
+export default createService(
+  {
+    getOne,
     getAll,
-    addTodo,
+    add,
   },
-};
+  {
+    dataHandler(response) {
+      return response.data;
+    }
+  }
+);

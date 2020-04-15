@@ -1,39 +1,22 @@
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 import * as merge from 'lodash.merge';
-import { Assign } from 'utility-types';
 import iceRequest from '$ice/request/request';
-import useIceRequest from '$ice/request/useRequest';
-
-type PropType<Obj, Prop extends keyof Obj> = Obj[Prop];
 
 type Options = Record<string ,any>;
-type Params = Record<string ,any>;
-type Response = Record<string ,any>;
-type DataHandler = (response: any) => any;
+type DataHandler = (response: any, error?: Error) => any;
 
 interface BaseConfing {
   type?: string;
+  dataHandler?: DataHandler;
+}
+
+interface APIConfig extends BaseConfing {
   options: Options;
-  params?: Params;
-  response?: Response;
-  dataHandler?: DataHandler;
-}
-
-interface Config extends BaseConfing{
-  dataHandler?: DataHandler;
-}
-
-interface RequestConfig extends BaseConfing {
   isInit?: boolean;
 }
 
-export interface ServiceConfigs {
-  config: Config;
-  requests: {
-    [name: string]: RequestConfig;
-  };
-  dataHandler?(dataMap, error): any;
+export interface APIConfigs {
+  [name: string]: APIConfig;
 }
 
 interface Result {
@@ -42,48 +25,50 @@ interface Result {
   error: Error | null;
 }
 
-export interface Service<
-  C extends ServiceConfigs,
-> {
-  useRequest: <K extends keyof C['requests']>(name: K) => ReturnType<typeof useIceRequest>;
-  getRequest:
-  <K extends keyof C['requests']>
-  (name: K) =>
-  ( params?: PropTypes.InferProps<Assign<C['config']['params'], C['requests'][K]['params']>> ) =>
-  Promise<
-  C['requests'][K]['dataHandler'] extends DataHandler
-    ? ReturnType<C['requests'][K]['dataHandler']>
-    : C['config']['dataHandler'] extends DataHandler
-      ? ReturnType<C['config']['dataHandler']>
-      : PropTypes.InferProps<Assign<C['config']['response'], C['requests'][K]['response']>>
-  >;
-  getResult: <K extends keyof C['requests']>(name: K) => Result;
-  bindModel: (model: any) => void;
-  useInit: () => void;
-  reloadInit: () => Promise<void>;
-}
+export default function<
+  C extends APIConfigs = APIConfigs,
+  D extends BaseConfing = BaseConfing
+>(apiConfigs: C, defaultConfig?: D, dataHandler?: DataHandler) {
+  type APIConfigKey = keyof C;
+  type APIConfigKeys = APIConfigKey[];
 
-export default function<C extends ServiceConfigs>(configs: C): Service<C> {
-  type IRequestsConfig = PropType<C, 'requests'>;
-  type IConfig = PropType<C, 'config'>;
-  type IRequestsConfigKey = keyof IRequestsConfig;
-  type IRequestsConfigKeys = IRequestsConfigKey[];
+  const service: any = {};
+  (Object.keys(apiConfigs) as APIConfigKeys).forEach((name) => {
+    const { options } = getConfig(name);
+    service[name] = async function(params?, setOptions?) {
+      let data;
+      this.status = 'loading';
 
-  const { config, requests, dataHandler } = configs;
+      let finallyOptions = options;
+      if (params) {
+        finallyOptions = merge({}, finallyOptions, { params });
+      }
+      if (setOptions) {
+        finallyOptions = merge({}, finallyOptions, setOptions);
+      }
 
-  const results: any = {};
-  (Object.keys(requests) as IRequestsConfigKeys).forEach((name) => {
-    results[name] = {
-      status: 'init',
-      data: null,
-      error: null,
+      try {
+        data = await iceRequest(finallyOptions);
+        this.data = data;
+        this.status = 'loaded';
+      } catch (error) {
+        this.error = error;
+        this.status = 'error';
+        throw error;
+      }
+      return data;
     };
+
+    service[name].status = 'init';
+    service[name].data = null;
+    service[name].error = null;
   });
 
-  function getValue<K extends IRequestsConfigKey>(name: K): IConfig & IRequestsConfig[K] {
-    const values = merge({}, config, requests[name as string]);
-    const { options, dataHandler } = values;
-    const transformResponse = options.transformResponse || [];
+  function getConfig<K extends APIConfigKey>(name: K): APIConfig {
+    const config = merge({}, defaultConfig, apiConfigs[name]);
+    const { options = {}, dataHandler } = config;
+    const { transformResponse = [] } = options;
+
     if (dataHandler) {
       transformResponse.push(function(response) {
         try {
@@ -95,8 +80,9 @@ export default function<C extends ServiceConfigs>(configs: C): Service<C> {
         return response;
       });
     }
+
     return {
-      ...values,
+      ...config,
       options: {
         ...options,
         transformResponse,
@@ -104,65 +90,24 @@ export default function<C extends ServiceConfigs>(configs: C): Service<C> {
     };
   }
 
-  function useRequest<K extends IRequestsConfigKey>(name: K) {
-    const { type, options } = getValue(name);
-    const state = useIceRequest(options);
-    const { error, data, status } = state;
-    results[name] = {
-      data,
-      error,
-      status,
-    };
-    return state;
-  }
-
-  function getRequest<K extends IRequestsConfigKey>(name: K) {
-    const { type, options } = getValue(name);
-    return async (params) => {
-      let data;
-      results[name].status = 'loading';
-      try {
-        data = await iceRequest({
-          ...options,
-          params: {
-            ...options.params,
-            ...params,
-          },
-        });
-        results[name].data = data;
-        results[name].status = 'loaded';
-      } catch (error) {
-        results[name].error = error;
-        results[name].status = 'error';
-        throw error;
-      }
-      return data;
-    };
-  }
-
-  function getResult<K extends IRequestsConfigKey>(name: K) {
-    return Object.assign({}, results[name]);
-  }
-
-  function getInitRequests() {
-    const initRequests: any = {};
-    Object.keys(requests).forEach((name) => {
-      const { isInit } = requests[name];
-      if (isInit) {
-        initRequests[name] = getRequest(name);
+  function getInitAPIs() {
+    const initAPIs: any = {};
+    Object.keys(apiConfigs).forEach((name) => {
+      if (apiConfigs[name].isInit) {
+        initAPIs[name] = service[name];
       }
     });
-    return initRequests;
+    return initAPIs;
   }
 
   async function requestInitData() {
-    const initRequests = getInitRequests();
+    const initAPIs = getInitAPIs();
     const dataMap = {};
     let error;
-    await Promise.all(Object.keys(initRequests).map(async (name) => {
-      const initRequest = initRequests[name];
+    await Promise.all(Object.keys(initAPIs).map(async (name) => {
+      const initAPI = initAPIs[name];
       try {
-        dataMap[name] = await initRequest();
+        dataMap[name] = await initAPI();
       } catch (e) {
         error = e;
       }
@@ -173,11 +118,6 @@ export default function<C extends ServiceConfigs>(configs: C): Service<C> {
     };
   }
 
-  let dispatchers;
-  function bindModel([, value]) {
-    dispatchers = value;
-  }
-
   async function reloadInit() {
     const { dataMap, error } = await requestInitData();
     let nextState = dataMap;
@@ -185,23 +125,20 @@ export default function<C extends ServiceConfigs>(configs: C): Service<C> {
       nextState = dataHandler(dataMap, error);
     }
 
-    dispatchers.setState(nextState);
+    if (dispatchers) {
+      dispatchers.setState(nextState);
+    }
   }
 
-  function useInit() {
+  let dispatchers;
+  function useInit([, value]) {
+    dispatchers = value;
     React.useEffect(() => {
       reloadInit();
     }, []);
   }
 
-  return {
-    useRequest,
-    getRequest,
-    getResult,
-
-    // 互转完备性
-    bindModel,
-    useInit,
-    reloadInit,
-  };
+  service.useInit = useInit;
+  service.reloadInit = reloadInit;
+  return service;
 }
