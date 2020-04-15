@@ -56,7 +56,7 @@ const add = {
   dataHandle: transformTodo,
 };
 
-export default createService(
+export default createService<Types>(
   {
     getOne,
     getAll,

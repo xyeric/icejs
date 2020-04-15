@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as merge from 'lodash.merge';
+import * as transform from 'lodash.transform';
 import iceRequest from '$ice/request/request';
 
 type Options = Record<string ,any>;
@@ -25,17 +26,26 @@ interface Result {
   error: Error | null;
 }
 
-export default function<
-  C extends APIConfigs = APIConfigs,
-  D extends BaseConfing = BaseConfing
->(apiConfigs: C, defaultConfig?: D, dataHandler?: DataHandler) {
-  type APIConfigKey = keyof C;
-  type APIConfigKeys = APIConfigKey[];
+interface UseInit {
+  (model: any): void;
+}
 
-  const service: any = {};
-  (Object.keys(apiConfigs) as APIConfigKeys).forEach((name) => {
+interface ReloadInit {
+  (): void;
+}
+
+interface Service {
+  useInit: UseInit;
+  reloadInit: ReloadInit;
+}
+
+export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, dataHandler?: DataHandler) {
+  type T<S> = {
+    [K in keyof S]: S[K] & Result;
+  }
+  const service = transform(apiConfigs, (result, config, name) => {
     const { options } = getConfig(name);
-    service[name] = async function(params?, setOptions?) {
+    result[name] = async function(params?, setOptions?) {
       let data;
       this.status = 'loading';
 
@@ -59,12 +69,12 @@ export default function<
       return data;
     };
 
-    service[name].status = 'init';
-    service[name].data = null;
-    service[name].error = null;
+    result[name].status = 'init';
+    result[name].data = null;
+    result[name].error = null;
   });
 
-  function getConfig<K extends APIConfigKey>(name: K): APIConfig {
+  function getConfig(name) {
     const config = merge({}, defaultConfig, apiConfigs[name]);
     const { options = {}, dataHandler } = config;
     const { transformResponse = [] } = options;
@@ -91,7 +101,7 @@ export default function<
   }
 
   function getInitAPIs() {
-    const initAPIs: any = {};
+    const initAPIs = {};
     Object.keys(apiConfigs).forEach((name) => {
       if (apiConfigs[name].isInit) {
         initAPIs[name] = service[name];
@@ -140,5 +150,5 @@ export default function<
 
   service.useInit = useInit;
   service.reloadInit = reloadInit;
-  return service;
+  return service as (T<S> & Service);
 }
