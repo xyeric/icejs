@@ -1,4 +1,4 @@
-module.exports = ({ types: t }, { routesPath }) => {
+module.exports = ({ types: t }, { routesPath, alias }) => {
   return {
     visitor: {
       ImportDeclaration(nodePath, state) {
@@ -7,19 +7,16 @@ module.exports = ({ types: t }, { routesPath }) => {
           let value = nodePath.node.source.value;
           if (typeof value === 'string') {
             // 配置式路由
-            // e.g: import Home from '@/pages/Home';
-            // e.g: import Home from '../pages/Home'
-            if (value.startsWith('@/pages') || value.includes('../pages')) {
+            // default alias: import Home from '@/pages/Home';
+            // custom alias: import Home from '$pages/Home';
+            // relative path: import Home from '../pages/Home'
+            const matchedAliasKey = matchAliasKey(alias, value);
+            if (value.startsWith('@/pages') || value.includes('../pages') || matchedAliasKey) {
               const arr = value.split('/');
               const pageName = arr[arr.length -1];
               // replace to: import Home from 'ice/Home/Home'
               value = `ice/${pageName}/${pageName}`;
-              nodePath.replaceWith(
-                t.ImportDeclaration(
-                  nodePath.node.specifiers,
-                  t.stringLiteral(value)
-                )
-              );
+              replaceWith(t, nodePath, value);
             }
 
             // 约定式路由
@@ -28,12 +25,7 @@ module.exports = ({ types: t }, { routesPath }) => {
               const pageName = value.split('/')[3];
               // replace to: import Home from './pages/Home/Home'
               value = `./pages/${pageName}/${pageName}`;
-              nodePath.replaceWith(
-                t.ImportDeclaration(
-                  nodePath.node.specifiers,
-                  t.stringLiteral(value)
-                )
-              );
+              replaceWith(t, nodePath, value);
             }
           }
         }
@@ -47,9 +39,11 @@ module.exports = ({ types: t }, { routesPath }) => {
             let value = args[i].value;
             if (typeof value === 'string') {
               // 配置式路由
-              // e.g: const Home = lazy(() => import('@/pages/Home'));
-              // e.g: Home =lazy (() => import('../pages/Home'));
-              if (value.startsWith('@/pages') || value.includes('../pages')) {
+              // default alias: const Home = lazy(() => import('@/pages/Home'));
+              // custom alias: const Home = lazy(() => import('$pages/home));
+              // relative path: const Home = lazy(() => import('../pages/Home'));
+              const matchedAliasKey = matchAliasKey(alias, value);
+              if (value.startsWith('@/pages') || value.includes('../pages') || matchedAliasKey) {
                 const arr = value.split('/');
                 const pageName = arr[arr.length -1];
                 // replace to: const Home =lazy (() => import('ice/Home/Home'));
@@ -72,3 +66,29 @@ module.exports = ({ types: t }, { routesPath }) => {
     },
   };
 };
+
+interface IAlias {
+  [key: string]: string;
+}
+
+function matchAliasKey(alias: IAlias, value: string): string {
+  let aliasKey = '';
+  if (alias) {
+    const aliasKeys = Object.keys(alias);
+    aliasKeys.forEach(currKey => {
+      if (value.startsWith(currKey)) {
+        aliasKey = currKey;
+      }
+    });
+  }
+  return aliasKey;
+}
+
+function replaceWith(t, nodePath, value) {
+  nodePath.replaceWith(
+    t.ImportDeclaration(
+      nodePath.node.specifiers,
+      t.stringLiteral(value)
+    )
+  );
+}

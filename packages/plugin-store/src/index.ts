@@ -39,7 +39,7 @@ export default async (api) => {
       ...(userConfig.babelPlugins as [] || []),
       [
         require.resolve('./babelPluginReplacePath'),
-        { routesPath }
+        { routesPath, alias: userConfig.alias }
       ]
     ]
   );
