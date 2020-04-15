@@ -12,7 +12,7 @@ export default async (api) => {
   applyMethod('addIceExport', { source: './service/createService', exportName: 'createService' });
 
   onGetWebpackConfig(config => {
-    config.resolve.alias.set('$ice/createService', path.join(distPath, 'create.ts'));
+    config.resolve.alias.set('$ice/createService', path.join(distPath, 'createService.ts'));
   });
 
 };

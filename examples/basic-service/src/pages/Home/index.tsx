@@ -1,8 +1,14 @@
 import React from 'react';
-import Guide from '@/components/Guide';
+import Fetch from '@/components/Fetch';
+import User from './components/User';
 
 const Home = () => {
-  return <Guide />;
+  return (
+    <>
+      <Fetch />
+      <User />
+    </>
+  );
 };
 
 export default Home;

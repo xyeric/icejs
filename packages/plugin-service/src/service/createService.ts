@@ -44,10 +44,11 @@ export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, 
     [K in keyof S]: S[K] & Result;
   }
   const service = transform(apiConfigs, (result, config, name) => {
-    const { options } = getConfig(name);
+    const { options, dataHandler } = getConfig(name);
     result[name] = async function(params?, setOptions?) {
       let data;
-      this.status = 'loading';
+      let error;
+      result[name].status = 'loading';
 
       let finallyOptions = options;
       if (params) {
@@ -59,13 +60,24 @@ export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, 
 
       try {
         data = await iceRequest(finallyOptions);
-        this.data = data;
-        this.status = 'loaded';
-      } catch (error) {
-        this.error = error;
-        this.status = 'error';
-        throw error;
+        result[name].status = 'loaded';
+      } catch (e) {
+        result[name].status = 'error';
+        error = e;
+        // TODO 抛出错误才是更合理的，但是目前 iceluna 中 catch 了错误
+        // throw error;
+        console.error(e);
       }
+
+      if (dataHandler) {
+        // TODO 抛出错误才是更合理的，但是目前 iceluna 中 catch 了错误
+        try {
+          data = dataHandler(data, error);
+        } catch (error) { /** Ignore */ }
+      }
+
+      result[name].data = data;
+      result[name].error = error;
       return data;
     };
 
@@ -76,28 +88,7 @@ export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, 
 
   function getConfig(name) {
     const config = merge({}, defaultConfig, apiConfigs[name]);
-    const { options = {}, dataHandler } = config;
-    const { transformResponse = [] } = options;
-
-    if (dataHandler) {
-      transformResponse.push(function(response) {
-        try {
-          if (typeof response === 'string') {
-            response = JSON.parse(response);
-          }
-          return dataHandler(response);
-        } catch (e) { /* Ignore */ }
-        return response;
-      });
-    }
-
-    return {
-      ...config,
-      options: {
-        ...options,
-        transformResponse,
-      }
-    };
+    return config;
   }
 
   function getInitAPIs() {
