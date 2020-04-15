@@ -1,9 +1,9 @@
-module.exports = ({ types: t }, { routeFile }) => {
+module.exports = ({ types: t }, { routesPath }) => {
   return {
     visitor: {
       ImportDeclaration(path, state) {
-        const isRouteFile = (routeFile === state.filename);
-        if (isRouteFile) {
+        const isRoutesFile = (routesPath === state.filename);
+        if (isRoutesFile) {
           let value = path.node.source.value;
           if (typeof value === 'string') {
             // e.g: import Home from '@/pages/Home';
@@ -37,8 +37,8 @@ module.exports = ({ types: t }, { routeFile }) => {
       },
 
       CallExpression(path, state) {
-        const isRouteFile = (routeFile === state.filename);
-        if (isRouteFile) {
+        const isRoutesFile = (routesPath === state.filename);
+        if (isRoutesFile) {
           const args = path.node.arguments;
           for (let i = 0; i < args.length; i++) {
             let value = args[i].value;

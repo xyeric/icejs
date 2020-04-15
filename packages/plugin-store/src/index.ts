@@ -27,15 +27,22 @@ export default async (api) => {
   applyMethod('addIceTypesExport', { source: './store/types' });
 
   // add babel plugins for ice lazy
-  const routerOptions = userConfig.router || {};
-  const { configPath } = routerOptions;
-  const routeConfigPath = configPath
-    ? path.join(rootDir, configPath)
-    : path.join(rootDir, `src/routes.${projectType}`);
-  const hasRouteFile = fse.existsSync(routeConfigPath);
-  const routeTempPath = path.join(targetPath, `routes.${projectType}`);
-  const routeFile = hasRouteFile ? routeConfigPath : routeTempPath;
-  modifyUserConfig('babelPlugins', [...(userConfig.babelPlugins as [] || []), [require.resolve('./babelPluginReplacePath'), { routeFile }]]);
+  const { configPath } = userConfig.router || {};
+  const { routesPath } = applyMethod('getRoutes', {
+    rootDir,
+    tempDir: targetPath,
+    configPath,
+    projectType
+  });
+  modifyUserConfig('babelPlugins',
+    [
+      ...(userConfig.babelPlugins as [] || []),
+      [
+        require.resolve('./babelPluginReplacePath'),
+        { routesPath }
+      ]
+    ]
+  );
 
   onGetWebpackConfig(config => {
     if (command === 'build') {
