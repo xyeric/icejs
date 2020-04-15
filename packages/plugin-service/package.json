@@ -7,6 +7,7 @@
   "license": "MIT",
   "main": "lib/index.js",
   "dependencies": {
+    "fs-extra": "^8.1.0",
     "lodash.merge": "^4.6.2",
     "lodash.transform": "^4.6.0",
     "utility-types": "^3.10.0"
