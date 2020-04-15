@@ -26,17 +26,17 @@ interface Result {
   error: Error | null;
 }
 
-interface UseInit {
+interface UseInitData {
   (model: any): void;
 }
 
-interface ReloadInit {
+interface ReloadInitData {
   (): void;
 }
 
 interface Service {
-  useInit: UseInit;
-  reloadInit: ReloadInit;
+  useInitData: UseInitData;
+  reloadInitData: ReloadInitData;
 }
 
 export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, dataHandler?: DataHandler) {
@@ -119,7 +119,7 @@ export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, 
     };
   }
 
-  async function reloadInit() {
+  async function reloadInitData() {
     const { dataMap, error } = await requestInitData();
     let nextState = dataMap;
     if (dataHandler) {
@@ -132,14 +132,14 @@ export default function<S>(apiConfigs: APIConfigs, defaultConfig?: BaseConfing, 
   }
 
   let dispatchers;
-  function useInit([, value]) {
+  function useInitData([, value]) {
     dispatchers = value;
     React.useEffect(() => {
-      reloadInit();
+      reloadInitData();
     }, []);
   }
 
-  service.useInit = useInit;
-  service.reloadInit = reloadInit;
+  service.useInitData = useInitData;
+  service.reloadInitData = reloadInitData;
   return service as (T<S> & Service);
 }

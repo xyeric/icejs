@@ -9,11 +9,10 @@ export default async (api) => {
 
   // move service to .ice/service
   await fse.copy(srcPath, distPath);
-  applyMethod('addIceExport', { source: './service/createService', exportName: 'createService' });
+  applyMethod('addIceExport', { source: './service/create', exportName: 'createService' });
 
   onGetWebpackConfig(config => {
-    config.resolve.alias.set('$ice/createService', path.join(distPath, 'createService.ts'));
+    config.resolve.alias.set('$ice/service/create', path.join(distPath, 'create.ts'));
   });
-
 };
 
