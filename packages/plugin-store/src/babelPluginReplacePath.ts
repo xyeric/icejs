@@ -34,30 +34,32 @@ module.exports = ({ types: t }, { routesPath, alias }) => {
       CallExpression(nodePath, state) {
         const isRoutesFile = (routesPath === state.filename);
         if (isRoutesFile) {
-          const args = nodePath.node.arguments;
-          for (let i = 0; i < args.length; i++) {
-            let value = args[i].value;
-            if (typeof value === 'string') {
-              // 配置式路由
-              // default alias: const Home = lazy(() => import('@/pages/Home'));
-              // custom alias: const Home = lazy(() => import('$pages/home));
-              // relative path: const Home = lazy(() => import('../pages/Home'));
-              const matchedAliasKey = matchAliasKey(alias, value);
-              if (value.startsWith('@/pages') || value.includes('../pages') || matchedAliasKey) {
-                const arr = value.split('/');
-                const pageName = arr[arr.length -1];
-                // replace to: const Home =lazy (() => import('ice/Home/Home'));
-                value = `ice/${pageName}/${pageName}`;
-                args[i].value = value;
-              }
+          if (t.isImport(nodePath.node.callee)) {
+            const args = nodePath.node.arguments;
+            for (let i = 0; i < args.length; i++) {
+              let value = args[i].value;
+              if (typeof value === 'string') {
+                // 配置式路由
+                // default alias: const Home = lazy(() => import('@/pages/Home'));
+                // custom alias: const Home = lazy(() => import('$pages/home));
+                // relative path: const Home = lazy(() => import('../pages/Home'));
+                const matchedAliasKey = matchAliasKey(alias, value);
+                if (value.startsWith('@/pages') || value.includes('../pages') || matchedAliasKey) {
+                  const arr = value.split('/');
+                  const pageName = arr[arr.length -1];
+                  // replace to: const Home =lazy (() => import('ice/Home/Home'));
+                  value = `ice/${pageName}/${pageName}`;
+                  args[i].value = value;
+                }
 
-              // 约定式路由
-              // e.g: const Home = lazy(() => import(/* webpackChunkName: 'Home' */ '../src/pages/Home/index.tsx'));
-              if (value.startsWith('../src/pages')) {
-                const pageName = value.split('/')[3];
-                // replace to: import Home from './pages/Home/Home'
-                value = `./pages/${pageName}/${pageName}`;
-                args[i].value = value;
+                // 约定式路由
+                // e.g: const Home = lazy(() => import(/* webpackChunkName: 'Home' */ '../src/pages/Home/index.tsx'));
+                if (value.startsWith('../src/pages')) {
+                  const pageName = value.split('/')[3];
+                  // replace to: import Home from './pages/Home/Home'
+                  value = `./pages/${pageName}/${pageName}`;
+                  args[i].value = value;
+                }
               }
             }
           }
