@@ -44,6 +44,9 @@ export default createService<Types>(
     getUser,
   },
   {
+    options: {
+      timeout: 3000,
+    },
     dataHandler(response) {
       if (response.success) {
         return response.data;

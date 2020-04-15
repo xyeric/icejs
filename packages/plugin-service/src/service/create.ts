@@ -8,6 +8,7 @@ type DataHandler = (response: any, error?: Error) => any;
 
 interface BaseConfing {
   type?: string;
+  options?: Options;
   dataHandler?: DataHandler;
 }
 
